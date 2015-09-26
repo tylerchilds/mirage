@@ -1,0 +1,23 @@
+{
+  "name": "mirage",
+  "version": "0.0.0",
+  "homepage": "https://github.com/tylerchilds/mirage",
+  "authors": [
+    "Tyler Childs <tylerwchilds@gmail.com>"
+  ],
+  "description": "Mirage",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.0",
+    "underscore": "~1.8.3",
+    "socket.io-client": "~1.3.7"
+  }
+}
