@@ -61,9 +61,17 @@ Engine.prototype.process = function(value) {
       this.player.show_history();
       break;
     default:
-      if(! _.isFunction(this[method])) return this.error();
+      if(_.isFunction(this[method])){
+        this[method](args);
+        return;
+      }
 
-      this[method](args);
+      if(_.isObject(this[method])){
+        this[method].default(args);
+        return;
+      }
+      
+      return this.error();
   }
 };
 
@@ -97,8 +105,12 @@ Engine.prototype.clear = function() {
 
 Engine.prototype.help = function() {  
   var help_table = Formatter.table([
-    ["name [(string)]:", "set or view your player name"],
+    ["name [(nickname)]:", "set or view your player name"],
     ["theme [dark|light]:", "set or view your player name"],
+    ["&nbsp;"],
+    ["browser [url]:", "open a tab with the link"],
+    ["walkthrough:", "cheat your way through the game"],
+    ["&nbsp;"],
     ["history:", "show your command history"],
     ["help:", "display possible commands"], 
     ["clear:", "clear the output console"]
@@ -111,3 +123,7 @@ Engine.prototype.help = function() {
 Engine.prototype.error = function(){
   this.append("Didn't quite catch that. Try `help` if you need it.");
 };
+
+Engine.prototype.walkthrough = function(){
+  this.browser.open_link("https://github.com/tylerchilds/mirage#walkthrough");
+}

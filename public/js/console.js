@@ -17747,6 +17747,9 @@ function toArray(list, index) {
 (1)
 });
 
+function capitalizeEachWord(str) {
+	return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
 var Player = function(options){
   var settings = {
     name: "Link",
@@ -17851,9 +17854,17 @@ Engine.prototype.process = function(value) {
       this.player.show_history();
       break;
     default:
-      if(! _.isFunction(this[method])) return this.error();
+      if(_.isFunction(this[method])){
+        this[method](args);
+        return;
+      }
 
-      this[method](args);
+      if(_.isObject(this[method])){
+        this[method].default(args);
+        return;
+      }
+      
+      return this.error();
   }
 };
 
@@ -17887,8 +17898,12 @@ Engine.prototype.clear = function() {
 
 Engine.prototype.help = function() {  
   var help_table = Formatter.table([
-    ["name [(string)]:", "set or view your player name"],
+    ["name [(nickname)]:", "set or view your player name"],
     ["theme [dark|light]:", "set or view your player name"],
+    ["&nbsp;"],
+    ["browser [url]:", "open a tab with the link"],
+    ["walkthrough:", "cheat your way through the game"],
+    ["&nbsp;"],
     ["history:", "show your command history"],
     ["help:", "display possible commands"], 
     ["clear:", "clear the output console"]
@@ -17901,6 +17916,10 @@ Engine.prototype.help = function() {
 Engine.prototype.error = function(){
   this.append("Didn't quite catch that. Try `help` if you need it.");
 };
+
+Engine.prototype.walkthrough = function(){
+  this.browser.open_link("https://github.com/tylerchilds/mirage#walkthrough");
+}
 var Formatter = function() {};
 
 Formatter.table = function(data) {
@@ -17926,24 +17945,70 @@ Formatter.array = function(data) {
   
   return array;
 };
-var Message = function(options){
-  var settings = {
-    sender: this.player,
-    getter: null,
-    message: null
-  };
+var Browser = function(){};
 
-  _.extend(settings, options);
-  this.sender = settings.sender;
-  this.getter = settings.getter;
-  this.message = settings.message;
-
+Browser.prototype.open_link = function(url){
+	if(_.isUndefined(url)) return engine.append("Url must be specified");
+	
+  var win = window.open(url, '_blank');
+	if(win){
+		win.focus();
+		engine.append("Opened: " + url);
+	}else{
+		engine.append('Popups have been disabled')
+	}
 };
 
-Message.prototype.initialize = function(){
-  engine.draw();
+Browser.prototype.default = function(args){
+  engine.browser.open_link(args[0]);
 };
 
+Engine.prototype.browser = new Browser();
+var Wiki = function(){};
+
+Wiki.prototype.search = function(search){
+	var url = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro=&explaintext=&titles=";
+	$.ajax({
+		type: "GET",
+		url: url + search,
+		crossDomain: true,
+		contentType: "application/json; charset=UTF-8",
+    dataType: "jsonp",
+    success: function(data){
+    	Wiki.format(data.query.pages);
+    },
+    error: function(){
+    	Wiki.error(string);
+    }
+	});
+};
+
+Wiki.prototype.default = function(args){
+  engine.wiki.search(capitalizeEachWord(args.join(" ")));
+};
+
+Wiki.error = function(search){
+	engine.append("Could not wikify " + search);
+}
+
+Wiki.format = function(data){
+	var extract;
+	_.every(data, function(obj){
+		return extract = obj.extract;
+	});
+
+	if(_.isUndefined(extract)){
+		var error;
+		_.every(data, function(obj){
+		return error = obj.title;
+	});
+		return Wiki.error(error);
+	}
+
+	return engine.append(_.first(extract.split('.')));
+};
+
+Engine.prototype.wiki = new Wiki();
 var socket = io();
 var current = JSON.parse(localStorage.getItem('player'));
 var player;
