@@ -1,17 +1,22 @@
-var Message = function(options){
-  var settings = {
-    sender: this.player,
-    getter: null,
-    message: null
-  };
+var Message = function(options){};
 
-  _.extend(settings, options);
-  this.sender = settings.sender;
-  this.getter = settings.getter;
-  this.message = settings.message;
-
+Message.prototype.default = function(args){
+  switch(true){
+    case /^send$/.test(args[0]):
+      Message.send(_.rest(args).join(" "));
+      break;
+    default:
+      engine.append("Messenger has been shot, message not delivered");
+      break;
+  }
 };
 
-Message.prototype.initialize = function(){
-  engine.draw();
+Message.send = function(message){
+  socket.emit('chat message', message);
 };
+
+Message.receive = function(message){
+  engine.append("@"+ engine.player.name + ": " + message);
+};
+
+Engine.prototype.message = new Message();

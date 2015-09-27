@@ -17945,6 +17945,28 @@ Formatter.array = function(data) {
   
   return array;
 };
+var Message = function(options){};
+
+Message.prototype.default = function(args){
+  switch(true){
+    case /^send$/.test(args[0]):
+      Message.send(_.rest(args).join(" "));
+      break;
+    default:
+      engine.append("Messenger has been shot, message not delivered");
+      break;
+  }
+};
+
+Message.send = function(message){
+  socket.emit('chat message', message);
+};
+
+Message.receive = function(message){
+  engine.append("@"+ engine.player.name + ": " + message);
+};
+
+Engine.prototype.message = new Message();
 var Browser = function(){};
 
 Browser.prototype.open_link = function(url){
@@ -18016,16 +18038,6 @@ var engine;
 
 $(function(){
   initialize();
-
-  $(document).on('keyup', '.js-input', function(ev){
-    engine.keyup(ev);
-  });
-
-  $(document).on('submit', '.js-prompt', function(ev){
-    ev.preventDefault();
-    engine.submit(ev);
-    return false;
-  });
 });
 
 var initialize = function(){
@@ -18044,3 +18056,17 @@ var initialize = function(){
     engine.focus();
   });
 }
+
+$(document).on('keyup', '.js-input', function(ev){
+  engine.keyup(ev);
+});
+
+$(document).on('submit', '.js-prompt', function(ev){
+  ev.preventDefault();
+  engine.submit(ev);
+  return false;
+});
+
+socket.on('chat message', function(message){
+  Message.receive(message);
+});

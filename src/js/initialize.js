@@ -5,16 +5,6 @@ var engine;
 
 $(function(){
   initialize();
-
-  $(document).on('keyup', '.js-input', function(ev){
-    engine.keyup(ev);
-  });
-
-  $(document).on('submit', '.js-prompt', function(ev){
-    ev.preventDefault();
-    engine.submit(ev);
-    return false;
-  });
 });
 
 var initialize = function(){
@@ -33,3 +23,17 @@ var initialize = function(){
     engine.focus();
   });
 }
+
+$(document).on('keyup', '.js-input', function(ev){
+  engine.keyup(ev);
+});
+
+$(document).on('submit', '.js-prompt', function(ev){
+  ev.preventDefault();
+  engine.submit(ev);
+  return false;
+});
+
+socket.on('chat message', function(message){
+  Message.receive(message);
+});
