@@ -18025,7 +18025,7 @@ Help.prototype.default = function() {
 Help.standard = function(){
   var help_table = Formatter.table([
     ["name [(nickname)]:", "set or view your player name"],
-    ["theme [dark|light]:", "set or view your player name"],
+    ["theme [dark|light]:", "change the current theme"],
     ["chat [(message)]:", "broadcast a message to your chat room"],
     ["&nbsp;"],
     ["wiki [(search)]:", "search wikipedia"],
