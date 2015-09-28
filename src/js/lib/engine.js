@@ -14,7 +14,7 @@ Engine.prototype.initialize = function(){
 };
 
 Engine.prototype.submit = function(ev) {
-  var value = this.prompt.val();
+  var value = this.prompt.val().toLowerCase();
   var command = value.split(' ');
   var method = _.first(command);
   var args = _.rest(command);
