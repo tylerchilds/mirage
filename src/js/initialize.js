@@ -34,6 +34,6 @@ $(document).on('submit', '.js-prompt', function(ev){
   return false;
 });
 
-socket.on('chat message', function(message){
-  Message.receive(message);
+socket.on('chat', function(message){
+  Chat.receive(message);
 });

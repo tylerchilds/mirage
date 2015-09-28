@@ -18,7 +18,10 @@ Wiki.prototype.search = function(search){
 };
 
 Wiki.prototype.default = function(args){
-  engine.wiki.search(capitalizeEachWord(args.join(" ")));
+	if(! _.isEmpty(args))
+  	this.search(capitalizeEachWord(args.join(" ")));
+  else
+  	engine.append("Gotta search for something.");
 };
 
 Wiki.error = function(search){

@@ -7,8 +7,10 @@
 //= include lib/player.js
 //= include lib/engine.js
 //= include lib/formatter.js
-//= include lib/message.js
+//= include lib/chat.js
 //= include lib/browser.js
 //= include lib/wiki.js
+
+//= include lib/help.js
 
 //= include initialize.js

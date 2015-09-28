@@ -17896,23 +17896,6 @@ Engine.prototype.clear = function() {
   this.output.empty();
 };
 
-Engine.prototype.help = function() {  
-  var help_table = Formatter.table([
-    ["name [(nickname)]:", "set or view your player name"],
-    ["theme [dark|light]:", "set or view your player name"],
-    ["&nbsp;"],
-    ["browser [url]:", "open a tab with the link"],
-    ["walkthrough:", "cheat your way through the game"],
-    ["&nbsp;"],
-    ["history:", "show your command history"],
-    ["help:", "display possible commands"], 
-    ["clear:", "clear the output console"]
-  ]);
-  
-  var help = "Commands:<br />" + help_table;
-  this.append(help);
-};
-
 Engine.prototype.error = function(){
   this.append("Didn't quite catch that. Try `help` if you need it.");
 };
@@ -17945,28 +17928,21 @@ Formatter.array = function(data) {
   
   return array;
 };
-var Message = function(options){};
+var Chat = function(options){};
 
-Message.prototype.default = function(args){
-  switch(true){
-    case /^send$/.test(args[0]):
-      Message.send(_.rest(args).join(" "));
-      break;
-    default:
-      engine.append("Messenger has been shot, message not delivered");
-      break;
-  }
+Chat.prototype.default = function(args){
+  Chat.send(args.join(" "));
 };
 
-Message.send = function(message){
-  socket.emit('chat message', message);
+Chat.send = function(message){
+  socket.emit('chat', "@"+ engine.player.name + ": "+ message);
 };
 
-Message.receive = function(message){
-  engine.append("@"+ engine.player.name + ": " + message);
+Chat.receive = function(message){
+  engine.append(message);
 };
 
-Engine.prototype.message = new Message();
+Engine.prototype.chat = new Chat();
 var Browser = function(){};
 
 Browser.prototype.open_link = function(url){
@@ -18006,7 +17982,10 @@ Wiki.prototype.search = function(search){
 };
 
 Wiki.prototype.default = function(args){
-  engine.wiki.search(capitalizeEachWord(args.join(" ")));
+	if(! _.isEmpty(args))
+  	this.search(capitalizeEachWord(args.join(" ")));
+  else
+  	engine.append("Gotta search for something.");
 };
 
 Wiki.error = function(search){
@@ -18031,6 +18010,32 @@ Wiki.format = function(data){
 };
 
 Engine.prototype.wiki = new Wiki();
+var Help = function(options){};
+
+Help.prototype.default = function() {  
+  Help.standard();
+};
+
+Help.standard = function(){
+  var help_table = Formatter.table([
+    ["name [(nickname)]:", "set or view your player name"],
+    ["theme [dark|light]:", "set or view your player name"],
+    ["chat [(message)]:", "broadcast a message to your chat room"],
+    ["&nbsp;"],
+    ["wiki [(search)]:", "search wikipedia"],
+    ["browser [url]:", "open a tab with the link"],
+    ["walkthrough:", "cheat your way through the game"],
+    ["&nbsp;"],
+    ["history:", "show your command history"],
+    ["help:", "display possible commands"], 
+    ["clear:", "clear the output console"]
+  ]);
+  
+  var help = "Commands:<br />" + help_table;
+  engine.append(help);
+};
+
+Engine.prototype.help = new Help();
 var socket = io();
 var current = JSON.parse(localStorage.getItem('player'));
 var player;
@@ -18067,6 +18072,6 @@ $(document).on('submit', '.js-prompt', function(ev){
   return false;
 });
 
-socket.on('chat message', function(message){
-  Message.receive(message);
+socket.on('chat', function(message){
+  Chat.receive(message);
 });

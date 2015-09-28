@@ -103,23 +103,6 @@ Engine.prototype.clear = function() {
   this.output.empty();
 };
 
-Engine.prototype.help = function() {  
-  var help_table = Formatter.table([
-    ["name [(nickname)]:", "set or view your player name"],
-    ["theme [dark|light]:", "set or view your player name"],
-    ["&nbsp;"],
-    ["browser [url]:", "open a tab with the link"],
-    ["walkthrough:", "cheat your way through the game"],
-    ["&nbsp;"],
-    ["history:", "show your command history"],
-    ["help:", "display possible commands"], 
-    ["clear:", "clear the output console"]
-  ]);
-  
-  var help = "Commands:<br />" + help_table;
-  this.append(help);
-};
-
 Engine.prototype.error = function(){
   this.append("Didn't quite catch that. Try `help` if you need it.");
 };
