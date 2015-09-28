@@ -39,6 +39,9 @@ input:focus {
 td {
   padding: 0 10px; }
 
+.chat {
+  color: #f7f7f7; }
+
 .theme--light,
 .theme--light input {
   background-color: #f7f7f7;
@@ -46,6 +49,9 @@ td {
 
 .theme--light body:before {
   border-top: 1px solid #140B03; }
+
+.theme--light .chat {
+  color: #C17430; }
 
 body:before {
   -webkit-animation: oscillator 60s infinite;

@@ -1,7 +1,12 @@
+$orange: #C17430;
+$black: #140B03;
+$white: #f7f7f7;
+$blue: #0072c9;
+
 body,
 input{
-  color: #C17430;
-  background-color: #140B03;
+  color: $orange;
+  background-color: $black;
   font-family: monospace;
   font-size: 16px;
   line-height: 20px;
@@ -15,7 +20,7 @@ body:before{
   position: fixed;
   left: 0;
   right: 0;
-  border-top: 1px solid #C17430;
+  border-top: 1px solid $orange;
   content: '';
   z-index: 1;
 }
@@ -46,14 +51,22 @@ td{
   padding: 0 10px;
 }
 
+.chat{
+  color: $white;
+}
+
 .theme--light,
 .theme--light input{
-  background-color: #f7f7f7;
-  color: #140B03;
+  background-color: $white;
+  color: $black;
 }
 
 .theme--light body:before{
-  border-top: 1px solid #140B03;
+  border-top: 1px solid $black;
+}
+
+.theme--light .chat{
+  color: $orange;
 }
 
 body:before {

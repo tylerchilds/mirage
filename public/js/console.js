@@ -17808,12 +17808,16 @@ Engine.prototype.initialize = function(){
 
 Engine.prototype.submit = function(ev) {
   var value = this.prompt.val();
+  var command = value.split(' ');
+  var method = _.first(command);
+  var args = _.rest(command);
 
-  this.append("$ "+ value);
-  this.prompt.val("");
+  if(method != "chat"){
+    this.append("$ "+ value);
+  }
   
-  if(value != ""){
-    this.process(value);
+  if(command != ""){
+    this.process(method, args);
     this.player.history.push(value);
     this.player.save();
     
@@ -17821,6 +17825,8 @@ Engine.prototype.submit = function(ev) {
     this.history_index = this.player.history.length;
   }
   
+  this.prompt.val("");
+
   // scroll down
   $("html, body").animate({ scrollTop: $(document).height() }, 0);
   
@@ -17837,11 +17843,7 @@ Engine.prototype.append = function(value) {
   this.output.append("<div>" + value + "</div>");
 };
 
-Engine.prototype.process = function(value) {
-  var command = value.split(' ');
-  var method = _.first(command);
-  var args = _.rest(command);
-  
+Engine.prototype.process = function(method, args) {
   switch(true){
     case /^name$/.test(method):
       if(args[0]) this.player.set_name(args[0]);
@@ -17928,6 +17930,10 @@ Formatter.array = function(data) {
   
   return array;
 };
+
+Formatter.wrap = function(classname, string) {
+  return '<span class="'+ classname +'">'+ string +'</span>';
+};
 var Chat = function(options){};
 
 Chat.prototype.default = function(args){
@@ -17935,7 +17941,7 @@ Chat.prototype.default = function(args){
 };
 
 Chat.send = function(message){
-  socket.emit('chat', "@"+ engine.player.name + ": "+ message);
+  socket.emit('chat', Formatter.wrap("chat","@"+ engine.player.name + ": "+ message));
 };
 
 Chat.receive = function(message){

@@ -5,7 +5,7 @@ Chat.prototype.default = function(args){
 };
 
 Chat.send = function(message){
-  socket.emit('chat', "@"+ engine.player.name + ": "+ message);
+  socket.emit('chat', Formatter.wrap("chat","@"+ engine.player.name + ": "+ message));
 };
 
 Chat.receive = function(message){

@@ -23,3 +23,7 @@ Formatter.array = function(data) {
   
   return array;
 };
+
+Formatter.wrap = function(classname, string) {
+  return '<span class="'+ classname +'">'+ string +'</span>';
+};
