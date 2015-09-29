@@ -1,15 +1,6 @@
 var Engine = function(options) {
   this.prompt = options.prompt;
   this.output = options.output;
-  this.player = options.player;
-
-  this.initialize();
-};
-
-Engine.prototype.initialize = function(){
-  this.draw();
-
-  this.append("Welcome " + this.player.name);
 };
 
 Engine.prototype.submit = function(ev) {
@@ -24,7 +15,7 @@ Engine.prototype.submit = function(ev) {
   
   if(command != ""){
     this.process(method, args);
-    this.player.save();
+ 
     $(document).trigger('submit:command', value);
   }
   
@@ -33,6 +24,20 @@ Engine.prototype.submit = function(ev) {
   // scroll down
   $("html, body").animate({ scrollTop: $(document).height() }, 0);
   
+};
+
+Engine.prototype.process = function(method, args) {
+  if(_.isFunction(this[method])){
+    this[method](args);
+    return;
+  }
+
+  if(_.isObject(this[method])){
+    this[method].default(args);
+    return;
+  }
+  
+  return this.error();
 };
 
 Engine.prototype.focus = function() {
@@ -45,34 +50,6 @@ Engine.prototype.focus = function() {
 Engine.prototype.append = function(value) {
   this.output.append("<div>" + value + "</div>");
 };
-
-Engine.prototype.process = function(method, args) {
-  switch(true){
-    case /^name$/.test(method):
-      if(args[0]) this.player.set_name(args[0]);
-      else this.player.get_name();
-      break;
-    case /^theme/.test(method):
-      this.player.set_theme(args[0]);
-      break;
-    default:
-      if(_.isFunction(this[method])){
-        this[method](args);
-        return;
-      }
-
-      if(_.isObject(this[method])){
-        this[method].default(args);
-        return;
-      }
-      
-      return this.error();
-  }
-};
-
-Engine.prototype.draw = function(){
-  $('body').removeClass('theme--dark theme--light').addClass('theme--'+this.player.theme);
-}
 
 Engine.prototype.clear = function() {
   this.output.empty();

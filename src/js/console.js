@@ -4,10 +4,13 @@
 
 //= include helpers/utilities.js
 
-//= include lib/player.js
 //= include lib/engine.js
-//= include lib/history.js
+
+//= include lib/player.js
+//= include lib/log.js
+
 //= include lib/formatter.js
+
 //= include lib/chat.js
 //= include lib/browser.js
 //= include lib/wiki.js

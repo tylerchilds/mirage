@@ -17750,53 +17750,9 @@ function toArray(list, index) {
 function capitalizeEachWord(str) {
 	return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
-var Player = function(options){
-  var settings = {
-    name: "Link",
-    theme: "dark"
-  };
-
-  _.extend(settings, options);
-  this.name = settings.name;
-  this.theme = settings.theme;
-};
-
-Player.prototype.set_name = function(name) {
-  this.name = name;
-  engine.append("Name changed to: " + name);
-  this.save();
-};
-
-Player.prototype.get_name = function() {
-  engine.append("Your name is: " + this.name);
-};
-
-Player.prototype.set_theme = function(theme) {
-  if(theme == 'dark' || theme == 'light'){
-    this.theme = theme;
-    engine.draw();
-    this.save();
-    return engine.append("Theme updated")
-  }
-
-  engine.append("Only themes available are `dark` or `light`.");
-};
-
-Player.prototype.save = function() {
-  localStorage.setItem('player', JSON.stringify(this));
-};
 var Engine = function(options) {
   this.prompt = options.prompt;
   this.output = options.output;
-  this.player = options.player;
-
-  this.initialize();
-};
-
-Engine.prototype.initialize = function(){
-  this.draw();
-
-  this.append("Welcome " + this.player.name);
 };
 
 Engine.prototype.submit = function(ev) {
@@ -17811,7 +17767,7 @@ Engine.prototype.submit = function(ev) {
   
   if(command != ""){
     this.process(method, args);
-    this.player.save();
+ 
     $(document).trigger('submit:command', value);
   }
   
@@ -17820,6 +17776,20 @@ Engine.prototype.submit = function(ev) {
   // scroll down
   $("html, body").animate({ scrollTop: $(document).height() }, 0);
   
+};
+
+Engine.prototype.process = function(method, args) {
+  if(_.isFunction(this[method])){
+    this[method](args);
+    return;
+  }
+
+  if(_.isObject(this[method])){
+    this[method].default(args);
+    return;
+  }
+  
+  return this.error();
 };
 
 Engine.prototype.focus = function() {
@@ -17833,34 +17803,6 @@ Engine.prototype.append = function(value) {
   this.output.append("<div>" + value + "</div>");
 };
 
-Engine.prototype.process = function(method, args) {
-  switch(true){
-    case /^name$/.test(method):
-      if(args[0]) this.player.set_name(args[0]);
-      else this.player.get_name();
-      break;
-    case /^theme/.test(method):
-      this.player.set_theme(args[0]);
-      break;
-    default:
-      if(_.isFunction(this[method])){
-        this[method](args);
-        return;
-      }
-
-      if(_.isObject(this[method])){
-        this[method].default(args);
-        return;
-      }
-      
-      return this.error();
-  }
-};
-
-Engine.prototype.draw = function(){
-  $('body').removeClass('theme--dark theme--light').addClass('theme--'+this.player.theme);
-}
-
 Engine.prototype.clear = function() {
   this.output.empty();
 };
@@ -17872,24 +17814,74 @@ Engine.prototype.error = function(){
 Engine.prototype.walkthrough = function(){
   this.browser.open_link("https://github.com/tylerchilds/mirage#walkthrough");
 }
-var History = function(options) {
+var Player = function(options){
+  var settings = {
+    name: "Link",
+    theme: "dark"
+  };
+
+  _.extend(settings, options);
+  this.name = settings.name;
+  this.theme = settings.theme;
+
+  this.initialize();
+};
+
+Player.prototype.initialize = function(){
+  this.swap_theme();
+};
+
+Player.prototype.set_name = function(name) {
+  this.name = name;
+  engine.append("Name changed to: " + name);
+  this.save();
+};
+
+Player.prototype.get_name = function() {
+  engine.append("Your name is: " + this.name);
+};
+
+Player.prototype.swap_theme = function(){
+  $('body').removeClass('theme--dark theme--light').addClass('theme--'+ this.theme);
+}
+
+Player.prototype.save = function() {
+  localStorage.setItem('player', JSON.stringify(this));
+};
+
+Engine.prototype.name = function(args){
+  if(args[0]) player.set_name(args[0]);
+  else player.get_name();
+};
+
+Engine.prototype.theme = function(args){
+  if(args[0] == 'dark' || args[0] == 'light'){
+    player.theme = args[0];
+    player.swap_theme();
+    player.save();
+    return engine.append("Theme updated")
+  }
+
+  engine.append("Only themes available are `dark` or `light`.");
+};
+var Log = function(options) {
   var settings = {
     history: []
   };
 
   _.extend(settings, options);
-  
+
   this.history = settings.history;
   this.history_index = this.history.length;
 };
 
-History.prototype.up = function(ev) {
+Log.prototype.up = function(ev) {
   if(this.history_index - 1 < 0) return;
   var historical_value = this.history[--this.history_index];
   engine.prompt.val(historical_value);
 };
 
-History.prototype.down = function(ev) {
+Log.prototype.down = function(ev) {
   if(this.history_index + 1 > this.history.length - 1){
     this.history_index = this.history.length;
     return engine.prompt.val("");
@@ -17898,12 +17890,12 @@ History.prototype.down = function(ev) {
   engine.prompt.val(historical_value);
 };
 
-History.prototype.keyup = function(ev) {
+Log.prototype.keyup = function(ev) {
   if(ev.keyCode == 38) this.up();
   if(ev.keyCode == 40) this.down();
 };
 
-History.prototype.push = function(command){
+Log.prototype.push = function(command){
   this.history.push(command);
   localStorage.setItem('history', this.history);
   // set history index to the length to start over
@@ -17911,7 +17903,7 @@ History.prototype.push = function(command){
 };
 
 Engine.prototype.history = function() {
-  engine.append(Formatter.array(this.history));
+  engine.append(Formatter.array(log.history));
 };
 var Formatter = function() {};
 
@@ -18052,7 +18044,7 @@ Help.standard = function(){
 Engine.prototype.help = new Help();
 var socket = io();
 var player = JSON.parse(localStorage.getItem('player'));
-var history_yeah = {history: localStorage.getItem('history').split(",")};
+var log = {history: localStorage.getItem('history').split(",")};
 var engine;
 
 $(function(){
@@ -18064,7 +18056,7 @@ var initialize = function(){
   var $output = $('.js-output');
 
   player = _.isNull(player) ? new Player() : new Player(player);
-  history_yeah = _.isNull(history_yeah) ? new History() : new History(history_yeah);
+  log = _.isNull(log) ? new History() : new Log(log);
 
   engine = new Engine({
     prompt: $input, 
@@ -18084,11 +18076,11 @@ $(document).on('submit', '.js-prompt', function(ev){
 });
 
 $(document).on('keyup', '.js-input', function(ev){
-  history_yeah.keyup(ev);
+  log.keyup(ev);
 });
 
 $(document).on('submit:command', function(ev, command){
-  history_yeah.push(command);
+  log.push(command);
 });
 
 socket.on('chat', function(message){
