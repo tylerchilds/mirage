@@ -1,6 +1,6 @@
 var socket = io();
-var current = JSON.parse(localStorage.getItem('player'));
-var player;
+var player = JSON.parse(localStorage.getItem('player'));
+var history_yeah = {history: localStorage.getItem('history').split(",")};
 var engine;
 
 $(function(){
@@ -11,7 +11,8 @@ var initialize = function(){
   var $input = $('.js-input');
   var $output = $('.js-output');
 
-  player = _.isNull(current) ? new Player() : new Player(current)
+  player = _.isNull(player) ? new Player() : new Player(player);
+  history_yeah = _.isNull(history_yeah) ? new History() : new History(history_yeah);
 
   engine = new Engine({
     prompt: $input, 
@@ -24,14 +25,18 @@ var initialize = function(){
   });
 }
 
-$(document).on('keyup', '.js-input', function(ev){
-  engine.keyup(ev);
-});
-
 $(document).on('submit', '.js-prompt', function(ev){
   ev.preventDefault();
   engine.submit(ev);
   return false;
+});
+
+$(document).on('keyup', '.js-input', function(ev){
+  history_yeah.keyup(ev);
+});
+
+$(document).on('submit:command', function(ev, command){
+  history_yeah.push(command);
 });
 
 socket.on('chat', function(message){

@@ -6,6 +6,7 @@
 
 //= include lib/player.js
 //= include lib/engine.js
+//= include lib/history.js
 //= include lib/formatter.js
 //= include lib/chat.js
 //= include lib/browser.js

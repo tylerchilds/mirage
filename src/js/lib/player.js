@@ -1,14 +1,12 @@
 var Player = function(options){
   var settings = {
     name: "Link",
-    theme: "dark",
-    history: []
+    theme: "dark"
   };
 
   _.extend(settings, options);
   this.name = settings.name;
   this.theme = settings.theme;
-  this.history = settings.history;
 };
 
 Player.prototype.set_name = function(name) {
@@ -30,10 +28,6 @@ Player.prototype.set_theme = function(theme) {
   }
 
   engine.append("Only themes available are `dark` or `light`.");
-};
-
-Player.prototype.show_history = function() {
-  engine.append(Formatter.array(this.history));
 };
 
 Player.prototype.save = function() {

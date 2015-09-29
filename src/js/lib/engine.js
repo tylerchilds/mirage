@@ -2,7 +2,6 @@ var Engine = function(options) {
   this.prompt = options.prompt;
   this.output = options.output;
   this.player = options.player;
-  this.history_index = this.player.history.length;
 
   this.initialize();
 };
@@ -25,11 +24,8 @@ Engine.prototype.submit = function(ev) {
   
   if(command != ""){
     this.process(method, args);
-    this.player.history.push(value);
     this.player.save();
-    
-    // set history index to the length to start over
-    this.history_index = this.player.history.length;
+    $(document).trigger('submit:command', value);
   }
   
   this.prompt.val("");
@@ -59,9 +55,6 @@ Engine.prototype.process = function(method, args) {
     case /^theme/.test(method):
       this.player.set_theme(args[0]);
       break;
-    case /^history$/.test(method):
-      this.player.show_history();
-      break;
     default:
       if(_.isFunction(this[method])){
         this[method](args);
@@ -75,26 +68,6 @@ Engine.prototype.process = function(method, args) {
       
       return this.error();
   }
-};
-
-Engine.prototype.keyup = function(ev) {
-  if(ev.keyCode == 38) this.history_up();
-  if(ev.keyCode == 40) this.history_down();
-};
-
-Engine.prototype.history_up = function(ev) {
-  if(this.history_index - 1 < 0) return;
-  var historical_value = this.player.history[--this.history_index];
-  this.prompt.val(historical_value);
-};
-
-Engine.prototype.history_down = function(ev) {
-  if(this.history_index + 1 > this.player.history.length - 1){
-    this.history_index = this.player.history.length;
-    return this.prompt.val("");
-  } 
-  var historical_value = this.player.history[++this.history_index];
-  this.prompt.val(historical_value);
 };
 
 Engine.prototype.draw = function(){
